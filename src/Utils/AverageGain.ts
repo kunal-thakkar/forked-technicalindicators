@@ -1,3 +1,4 @@
+import { CandleData } from '../index';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 
 
@@ -7,7 +8,6 @@ export class AvgGainInput extends IndicatorInput {
 }
 
 export class AverageGain extends Indicator {
-  generator:IterableIterator<number | undefined>;
   constructor(input:AvgGainInput) {
     super(input);
     let values = input.values;
@@ -15,12 +15,12 @@ export class AverageGain extends Indicator {
     let format = this.format;
 
     this.generator = (function* (period){
-      var currentValue = yield;
+      var currentValue: number = yield;
       var counter = 1;
       var gainSum = 0;
       var avgGain;
-      var gain;
-      var lastValue = currentValue;
+      var gain: number;
+      var lastValue: number = currentValue;
       currentValue = yield
       while(true){
         gain = currentValue - lastValue;
@@ -56,8 +56,8 @@ export class AverageGain extends Indicator {
 
   static calculate = averagegain;
 
-    nextValue(price:number):number | undefined {
-        return this.generator.next(price).value;
+  override nextValue(price:CandleData):number | undefined {
+        return this.generator.next(price.close).value;
     };
 }
 

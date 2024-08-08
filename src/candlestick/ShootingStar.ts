@@ -12,7 +12,7 @@ export default class ShootingStar extends CandlestickFinder {
         this.requiredCount = 5;
     }
 
-    logic (data:StockData) {
+    override logic (data:StockData) {
         let isPattern = this.upwardTrend(data);
         isPattern = isPattern && this.includesHammer(data);
         isPattern = isPattern && this.hasConfirmation(data);

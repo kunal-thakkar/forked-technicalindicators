@@ -2,30 +2,28 @@
  * Created by AAravindan on 5/5/16.
  */
 
+import { CandleData } from '../index';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import { AverageGain } from '../Utils/AverageGain';
 import { AverageLoss } from '../Utils/AverageLoss';
 
 export class RSIInput extends IndicatorInput {
   period: number;
-  values: number[];
+  values: CandleData[];
 }
 
 export class RSI extends Indicator {
-
-  generator:IterableIterator<number | undefined>;
-
+  period: number;
   constructor(input:RSIInput) {
     super(input);
-
-    var period = input.period;
+    this.period = input.period;
     var values = input.values;
 
-    var GainProvider = new AverageGain({ period: period, values: [] });
-    var LossProvider = new AverageLoss({ period: period, values: [] });
+    var GainProvider = new AverageGain({ period: this.period, values: [] });
+    var LossProvider = new AverageLoss({ period: this.period, values: [] });
     let count = 1;
     this.generator = (function* (period){
-      var current = yield;
+      var current: CandleData = yield;
       var lastAvgGain,lastAvgLoss, RS, currentRSI;
       while(true){
         lastAvgGain = GainProvider.nextValue(current);
@@ -44,7 +42,7 @@ export class RSI extends Indicator {
         count++;
         current = yield currentRSI;
       }
-    })(period);
+    })(this.period);
 
     this.generator.next();
 
@@ -60,9 +58,9 @@ export class RSI extends Indicator {
 
   static calculate = rsi;
 
-    nextValue(price:number):number | undefined {
-        return this.generator.next(price).value;
-    };
+  override nextValue(price:CandleData):number | undefined {
+    return this.generator.next(price).value;
+  };
 }
 
 export function rsi(input:RSIInput):number[] {

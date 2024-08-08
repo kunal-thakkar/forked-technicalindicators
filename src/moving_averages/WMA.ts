@@ -2,12 +2,11 @@
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import { MAInput } from './SMA';
 import { LinkedList } from '../Utils/LinkedList';
+import { CandleData } from '../index';
 
 export class WMA extends Indicator{
   period:number;
   price:number[];
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor (input:MAInput) {
     super(input);
     var period = input.period;
@@ -46,10 +45,9 @@ export class WMA extends Indicator{
   static calculate = wma;
 
     //STEP 5. REMOVE GET RESULT FUNCTION
-  nextValue(price:number):number | undefined {
-      var result = this.generator.next(price).value;
-      if(result != undefined)
-          return this.format(result);
+  override nextValue(price:CandleData):number | undefined {
+    var result = this.generator.next(price.close!).value;
+    return (result != undefined) ? this.format(result) : undefined;
   };
 
 };

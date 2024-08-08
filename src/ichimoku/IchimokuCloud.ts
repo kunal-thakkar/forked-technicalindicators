@@ -19,8 +19,6 @@ export class IchimokuCloudOutput {
 }
 
 export class IchimokuCloud extends Indicator{
-    result : IchimokuCloudOutput[];
-    generator:IterableIterator<IchimokuCloudOutput | undefined>;
 	constructor(input:IchimokuCloudInput) {
         super(input);
         this.result = [];
@@ -104,7 +102,7 @@ export class IchimokuCloud extends Indicator{
     
     static calculate = ichimokucloud
 
-	nextValue(price:CandleData):IchimokuCloudOutput {
+	_nextValue(price:CandleData):IchimokuCloudOutput {
 		return this.generator.next(price).value;
 	}
 

@@ -22,8 +22,6 @@ export class ADXOutput extends IndicatorInput {
 
 
 export class ADX extends Indicator {
-  result : ADXOutput[]
-  generator:IterableIterator<ADXOutput | undefined>;;
   constructor(input:ADXInput) {
     super(input);
     var lows = input.low;
@@ -74,9 +72,9 @@ ADXOutput
           tick = yield;
           continue;
         }
-        let lastATR = emaTR.nextValue(calcTr)
-        let lastAPDM  = emaPDM.nextValue(calcPDM);
-        let lastAMDM  = emaMDM.nextValue(calcMDM);
+        let lastATR = emaTR.nextValue({close:calcTr})
+        let lastAPDM  = emaPDM.nextValue({close:calcPDM});
+        let lastAMDM  = emaMDM.nextValue({close:calcMDM});
         if((lastATR != undefined) && (lastAPDM != undefined) && (lastAMDM != undefined)) {
           lastPDI = (lastAPDM) * 100 / lastATR;
           lastMDI = (lastAMDM) * 100 / lastATR;
@@ -106,11 +104,12 @@ ADXOutput
 
   static calculate = adx;
 
-  nextValue(price:number):ADXOutput | undefined {
+  _nextValue(price:number):ADXOutput | undefined {
       let result = this.generator.next(price).value;
       if(result != undefined && result.adx != undefined) {
         return { adx : this.format(result.adx), pdi : this.format(result.pdi), mdi : this.format(result.mdi) };
       }
+      return undefined;
   };
 }
 

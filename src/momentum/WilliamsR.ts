@@ -1,3 +1,4 @@
+import { CandleData } from '../index';
 import { IndicatorInput, Indicator } from '../indicator/indicator';
 
 import LinkedList from '../Utils/FixedSizeLinkedList';
@@ -10,8 +11,6 @@ export class WilliamsRInput extends IndicatorInput {
 };
 
 export class WilliamsR extends Indicator {
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor(input:WilliamsRInput) {
     super(input);
     let lows = input.low;
@@ -29,13 +28,13 @@ export class WilliamsR extends Indicator {
     //Lowest Low = lowest low for the look-back period
     //Highest High = highest high for the look-back period
     //%R is multiplied by -100 correct the inversion and move the decimal.
-    this.generator = (function* ():IterableIterator<number | undefined>{
+    this.generator = (function* ():Generator<number | undefined, number|undefined, CandleData>{
       let index = 1;
       let pastHighPeriods = new LinkedList(period, true, false);
       let pastLowPeriods = new LinkedList(period, false, true);
       let periodLow;
       let periodHigh;
-      var tick = yield;
+      var tick: CandleData = yield;
       let williamsR;
       while (true) {
         pastHighPeriods.push(tick.high);
@@ -47,7 +46,7 @@ export class WilliamsR extends Indicator {
         }
         periodLow = pastLowPeriods.periodLow;
         periodHigh= pastHighPeriods.periodHigh;
-        williamsR = format((periodHigh - tick.close) / (periodHigh- periodLow) * -100);
+        williamsR = format((periodHigh - tick.close!) / (periodHigh- periodLow) * -100);
         tick = yield williamsR;
       }
     })();
@@ -68,10 +67,9 @@ export class WilliamsR extends Indicator {
 
   static calculate = williamsr;
 
-  nextValue(price:number):number | undefined {
+  override nextValue(price:CandleData):number | undefined {
       var nextResult = this.generator.next(price);
-      if(nextResult.value != undefined)
-        return this.format(nextResult.value);
+      return (nextResult.value != undefined) ? this.format(nextResult.value) : undefined;
   };
 }
 

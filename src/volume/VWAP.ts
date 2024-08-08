@@ -10,8 +10,6 @@ export class VWAPInput extends IndicatorInput {
 
 
 export class VWAP extends Indicator {
-  result : number[]
-  generator:IterableIterator<number | undefined>;;
   constructor(input:VWAPInput) {
     super(input);
     var lows = input.low;
@@ -25,17 +23,17 @@ export class VWAP extends Indicator {
     }
 
     this.result = [];
-
-    this.generator = (function* (){
-      var tick = yield;
+    
+    this.generator = (function* (): Generator<any, number, CandleData>{
+      let tick: CandleData = yield;
       let cumulativeTotal = 0;
       let cumulativeVolume = 0;
       while (true) {
-        let typicalPrice = (tick.high + tick.low + tick.close) / 3;
-        let total = tick.volume * typicalPrice;
+        let typicalPrice = (tick.high! + tick.low! + tick.close!) / 3;
+        let total = tick.volume! * typicalPrice;
         cumulativeTotal = cumulativeTotal + total;
-        cumulativeVolume = cumulativeVolume + tick.volume;
-        tick = yield cumulativeTotal / cumulativeVolume;;
+        cumulativeVolume = cumulativeVolume + tick.volume!;
+        yield cumulativeTotal / cumulativeVolume;;
       }
     })();
 
@@ -56,11 +54,12 @@ export class VWAP extends Indicator {
 
   static calculate = vwap;
 
-  nextValue(price: CandleData):number | undefined {
+  override nextValue(price: CandleData):number | undefined {
       let result = this.generator.next(price).value;
       if(result != undefined) {
         return result;
       }
+      return undefined;
   };
 }
 

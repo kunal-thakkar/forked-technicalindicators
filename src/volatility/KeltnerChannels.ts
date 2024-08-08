@@ -22,59 +22,55 @@ export class KeltnerChannelsOutput extends IndicatorInput {
 };
 
 export class KeltnerChannels extends Indicator {
-  result : KeltnerChannelsOutput[]
-  generator:IterableIterator<KeltnerChannelsOutput | undefined>;
-    constructor (input:KeltnerChannelsInput) {
-      super(input);
-      var maType = input.useSMA ? SMA : EMA;
-      var maProducer = new maType({period : input.maPeriod, values : [], format : (v) => {return v}});
-      var atrProducer = new ATR({period : input.atrPeriod, high : [], low : [], close : [], format : (v) => {return v}});
-      var tick;
-      this.result = [];
-      this.generator = (function* (){
-        var KeltnerChannelsOutput
-        var result;
-        tick = yield;
-        while (true)
-        {
-          var { close } = tick;
-          var ma = maProducer.nextValue(close);
-          var atr = atrProducer.nextValue(tick)
-          if(ma!=undefined && atr!=undefined) {
-            result = {
-              middle : ma,
-              upper : ma + (input.multiplier * (atr)),
-              lower : ma - (input.multiplier * (atr))
-            }
+  constructor (input:KeltnerChannelsInput) {
+    super(input);
+    var maType = input.useSMA ? SMA : EMA;
+    var maProducer = new maType({period : input.maPeriod, values : [], format : (v) => {return v}});
+    var atrProducer = new ATR({period : input.atrPeriod, high : [], low : [], close : [], format : (v) => {return v}});
+    var tick;
+    this.result = [];
+    this.generator = (function* (){
+      var KeltnerChannelsOutput
+      var result;
+      tick = yield;
+      while (true)
+      {
+        var { close } = tick;
+        var ma: any = maProducer.nextValue(close);
+        var atr: any = atrProducer.nextValue(tick)
+        if(ma!=undefined && atr!=undefined) {
+          result = {
+            middle : ma,
+            upper : ma + (input.multiplier * (atr)),
+            lower : ma - (input.multiplier * (atr))
           }
-          tick = yield result;
         }
-      })();
+        tick = yield result;
+      }
+    })();
 
-      this.generator.next();
+    this.generator.next();
 
-      var highs = input.high;
+    var highs = input.high;
 
-      highs.forEach((tickHigh, index) => {
-        var tickInput = {
-          high    : tickHigh,
-          low     : input.low[index],
-          close   : input.close[index],
-        }
-        var result = this.generator.next(tickInput);
-        if(result.value != undefined){
-          this.result.push(result.value);
-        }
-      });
+    highs.forEach((tickHigh, index) => {
+      var tickInput = {
+        high    : tickHigh,
+        low     : input.low[index],
+        close   : input.close[index],
+      }
+      var result = this.generator.next(tickInput);
+      if(result.value != undefined){
+        this.result.push(result.value);
+      }
+    });
   };
 
   static calculate = keltnerchannels;
 
-  nextValue(price:KeltnerChannelsInput):KeltnerChannelsOutput | undefined {
-     var result =  this.generator.next(price);
-     if(result.value != undefined){
-        return result.value;
-      }
+  _nextValue(price:KeltnerChannelsInput):KeltnerChannelsOutput | undefined {
+    var result =  this.generator.next(price);
+    return result.value;
   };
 }
 

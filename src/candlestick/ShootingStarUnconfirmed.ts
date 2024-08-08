@@ -7,7 +7,7 @@ export default class ShootingStarUnconfirmed extends ShootingStar {
         this.name = 'ShootingStarUnconfirmed';
     }
 
-    logic (data:StockData) {
+    override logic (data:StockData) {
         let isPattern = this.upwardTrend(data, false);
         isPattern = isPattern && this.includesHammer(data, false);
         return isPattern;

@@ -21,8 +21,6 @@ export class StochasticOutput{
 };
 
 export class Stochastic extends Indicator {
-  result:StochasticOutput[]
-  generator:IterableIterator<StochasticOutput | undefined>;
   constructor (input:StochasticInput) {
     super(input);
     let lows = input.low;
@@ -61,9 +59,9 @@ export class Stochastic extends Indicator {
           continue;
         }
         let periodLow = pastLowPeriods.periodLow;
-        k = (tick.close - periodLow) / (pastHighPeriods.periodHigh - periodLow) * 100;
+        k = (tick.close! - periodLow) / (pastHighPeriods.periodHigh - periodLow) * 100;
         k = isNaN(k) ? 0 : k; //This happens when the close, high and low are same for the entire period; Bug fix for 
-        d = dSma.nextValue(k);
+        d = dSma.nextValue({close:k});
         tick = yield {
           k : format(k),
           d : (d !== undefined) ? format(d) : undefined
@@ -87,10 +85,9 @@ export class Stochastic extends Indicator {
 
   static calculate = stochastic
 
-  nextValue (input:StochasticInput):StochasticOutput {
+  _nextValue (input:StochasticInput):StochasticOutput {
     let nextResult = this.generator.next(input);
-    if(nextResult.value !== undefined)
-      return nextResult.value;
+    return nextResult.value;
   };
 }
 

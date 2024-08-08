@@ -9,7 +9,6 @@ export class HighestInput extends IndicatorInput {
 }
 
 export class Highest extends Indicator {
-  generator:IterableIterator<number | undefined>;
     constructor (input:HighestInput) {
       super(input);
       var values     = input.values;
@@ -46,11 +45,9 @@ export class Highest extends Indicator {
 
   static calculate = highest;
 
-  nextValue(price:number):number | undefined {
-     var result =  this.generator.next(price);
-     if(result.value != undefined){
-        return result.value;
-      }
+  override nextValue(price:CandleData):number | undefined {
+     var result =  this.generator.next(price.close);
+     return result.value;
   };
 }
 

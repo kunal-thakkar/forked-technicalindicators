@@ -4,6 +4,7 @@
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import { SMA } from './SMA';
 import { EMA } from './EMA';
+import { CandleData } from '../index';
 
 export class MACDInput extends IndicatorInput {
     SimpleMAOscillator:boolean = true;
@@ -11,7 +12,7 @@ export class MACDInput extends IndicatorInput {
     fastPeriod:number;
     slowPeriod:number;
     signalPeriod:number;
-    constructor(public values:number[]) {
+    constructor(public values:CandleData[]) {
         super();
     }
 }
@@ -23,8 +24,6 @@ export class MACDOutput {
 }
 
 export class MACD extends Indicator{
-    result : MACDOutput[];
-    generator:IterableIterator<MACDOutput | undefined>;
     constructor(input:MACDInput) {
       super(input);
       var oscillatorMAtype = input.SimpleMAOscillator ? SMA : EMA;
@@ -49,13 +48,13 @@ export class MACD extends Indicator{
           }
           if(fast && slow) { //Just for typescript to be happy
             MACD = fast - slow;
-            signal = signalMAProducer.nextValue(MACD);
+            signal = signalMAProducer.nextValue({close:MACD});
           } 
-          histogram = MACD - signal;
+          histogram = MACD! - signal!;
           tick = yield({
             //fast : fast,
             //slow : slow,
-            MACD : format(MACD),
+            MACD : format(MACD!),
             signal : signal ? format(signal) : undefined,
             histogram : isNaN(histogram) ? undefined : format(histogram)
           })
@@ -76,9 +75,8 @@ export class MACD extends Indicator{
 
     static calculate=macd;
 
-    nextValue(price:number):MACDOutput | undefined {
-        var result = this.generator.next(price).value;
-        return result;
+    _nextValue(price:CandleData):MACDOutput | undefined {
+        return this.generator.next(price).value;
     };
 }
 

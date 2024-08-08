@@ -14,8 +14,6 @@ export class HeikinAshiInput extends IndicatorInput {
 }
 
 export class HeikinAshi extends Indicator{
-    result : CandleList;
-    generator:IterableIterator<CandleData | undefined>;
     constructor(input:HeikinAshiInput) {
       super(input);
       var format = this.format;
@@ -92,7 +90,7 @@ export class HeikinAshi extends Indicator{
 
     static calculate=heikinashi;
 
-    nextValue(price:CandleData):CandleData | undefined {
+    _nextValue(price:CandleData):CandleData | undefined {
         var result = this.generator.next(price).value;
         return result;
     };

@@ -14,8 +14,6 @@ export class TrueRangeInput extends IndicatorInput {
 };
 
 export class TrueRange extends Indicator {
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor(input:TrueRangeInput) {
     super(input);
     var lows = input.low;
@@ -29,7 +27,7 @@ export class TrueRange extends Indicator {
 
     this.result = [];
 
-    this.generator = (function* ():IterableIterator<number | undefined >{
+    this.generator = (function* ():Generator<number | undefined, any, CandleData>{
       var current:CandleData = yield;
       var previousClose,result;
       while (true) {
@@ -66,7 +64,7 @@ export class TrueRange extends Indicator {
 
   static calculate = truerange;
 
-  nextValue(price:CandleData):number | undefined {
+  override nextValue(price:CandleData):number | undefined {
      return this.generator.next(price).value;
   };
 

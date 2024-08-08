@@ -12,8 +12,6 @@ export class CCIInput extends IndicatorInput {
 
 
 export class CCI extends Indicator {
-  result : number[]
-  generator:IterableIterator<number | undefined>;;
   constructor(input:CCIInput) {
     super(input);
     var lows = input.low;
@@ -37,9 +35,9 @@ export class CCI extends Indicator {
       while (true) {
         let tp = (tick.high + tick.low + tick.close)/3
         currentTpSet.push(tp);
-        let smaTp = tpSMACalculator.nextValue(tp);
-        let meanDeviation:number = null;
-        let cci:number;
+        let smaTp = tpSMACalculator.nextValue({close:tp});
+        let meanDeviation:number = 0;
+        let cci:number = 0;
         let sum = 0;
         if(smaTp != undefined) {
           //First, subtract the most recent 20-period average of the typical price from each period's typical price. 
@@ -52,7 +50,7 @@ export class CCI extends Indicator {
           meanDeviation = sum / period
           cci = (tp  -  smaTp) / (constant * meanDeviation)
         }
-        tick = yield cci;
+        yield cci;
       }
     })();
 
@@ -72,11 +70,8 @@ export class CCI extends Indicator {
 
   static calculate = cci;
 
-  nextValue(price:CandleData):number | undefined {
-      let result = this.generator.next(price).value;
-      if(result != undefined) {
-        return result;
-      }
+  override nextValue(price:CandleData):number | undefined {
+    return this.generator.next(price).value;
   };
 }
 

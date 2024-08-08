@@ -10,7 +10,7 @@ export default class TweezerBottom extends CandlestickFinder {
         this.requiredCount = 5;
     }
 
-    logic (data:StockData) {
+    override logic (data:StockData) {
         return this.downwardTrend(data) && data.low[3] == data.low[4];
     }
 

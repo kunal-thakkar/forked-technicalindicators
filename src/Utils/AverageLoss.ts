@@ -1,3 +1,4 @@
+import { CandleData } from '../index';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 export class AvgLossInput extends IndicatorInput {
   values:number[]
@@ -5,7 +6,6 @@ export class AvgLossInput extends IndicatorInput {
 }
 
 export class AverageLoss extends Indicator {
-  generator:IterableIterator<number | undefined>;
   constructor(input:AvgLossInput) {
     super(input);
     let values = input.values;
@@ -54,8 +54,8 @@ export class AverageLoss extends Indicator {
 
   static calculate = averageloss;
 
-    nextValue(price:number):number | undefined {
-        return this.generator.next(price).value;
+  override nextValue(price:CandleData):number | undefined {
+        return this.generator.next(price.close).value;
     };
 } 
 

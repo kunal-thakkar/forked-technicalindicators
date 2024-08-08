@@ -8,9 +8,10 @@ import LinkedList from '../Utils/FixedSizeLinkedList';
 import { SMA }  from '../moving_averages/SMA';
 import { RSI } from '../oscillators/RSI';
 import { Stochastic } from '../momentum/Stochastic';
+import { CandleData } from '../index';
 
 export class StochasticRsiInput extends IndicatorInput{
-  values : number[];
+  values : CandleData[];
   rsiPeriod:number;
   stochasticPeriod:number;
   kPeriod:number;
@@ -24,8 +25,6 @@ export class StochasticRSIOutput{
 };
 
 export class StochasticRSI extends Indicator {
-  result:StochasticRSIOutput[]
-  generator:IterableIterator<StochasticRSIOutput | undefined>;
   constructor (input:StochasticRsiInput) {
     super(input);
     let closes = input.values;
@@ -52,7 +51,7 @@ export class StochasticRSI extends Indicator {
           var stochasticInput  = { high : lastRSI, low : lastRSI, close: lastRSI } as any;
           stochasticRSI = stochastic.nextValue(stochasticInput);
           if(stochasticRSI !== undefined && stochasticRSI.d !== undefined) {
-            d = dSma.nextValue(stochasticRSI.d);
+            d = dSma.nextValue({close:stochasticRSI.d});
             if(d !== undefined)
               result =  {
                 stochRSI : stochasticRSI.k,
@@ -77,10 +76,9 @@ export class StochasticRSI extends Indicator {
 
   static calculate = stochasticrsi
 
-  nextValue (input:StochasticRsiInput):StochasticRSIOutput {
-    let nextResult = this.generator.next(input);
-    if(nextResult.value !== undefined)
-      return nextResult.value;
+  _nextValue (input:StochasticRsiInput):StochasticRSIOutput {
+    let nextResult = this.generator.next(input.values[0]);
+    return nextResult.value;
   };
 }
 

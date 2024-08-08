@@ -21,8 +21,6 @@ export class KSTOutput {
 }
 
 export class KST extends Indicator { 
-  result : KSTOutput[];
-  generator:IterableIterator<KSTOutput | undefined>;
   constructor(input:KSTInput) {
     super(input);
     let priceArray  = input.values;
@@ -52,7 +50,7 @@ export class KST extends Indicator {
     this.result = [];
 
     let firstResult = Math.max(rocPer1 + smaPer1, rocPer2+smaPer2, rocPer3+smaPer3, rocPer4+smaPer4);
-    this.generator = (function* ():IterableIterator<KSTOutput | undefined>{
+    this.generator = (function* ():Generator<KSTOutput | undefined, any, any>{
       let index = 1;
       let tick = yield;
       let kst;
@@ -62,10 +60,10 @@ export class KST extends Indicator {
         let roc2Result = roc2.nextValue(tick);
         let roc3Result = roc3.nextValue(tick);
         let roc4Result = roc4.nextValue(tick);
-        RCMA1 = (roc1Result!==undefined) ? sma1.nextValue(roc1Result) : undefined;
-        RCMA2 = (roc2Result!==undefined) ? sma2.nextValue(roc2Result) : undefined;
-        RCMA3 = (roc3Result!==undefined) ? sma3.nextValue(roc3Result) : undefined;
-        RCMA4 = (roc4Result!==undefined) ? sma4.nextValue(roc4Result) : undefined;
+        RCMA1 = (roc1Result!==undefined) ? sma1.nextValue({close:roc1Result}) : undefined;
+        RCMA2 = (roc2Result!==undefined) ? sma2.nextValue({close:roc2Result}) : undefined;
+        RCMA3 = (roc3Result!==undefined) ? sma3.nextValue({close:roc3Result}) : undefined;
+        RCMA4 = (roc4Result!==undefined) ? sma4.nextValue({close:roc4Result}) : undefined;
         if(index < firstResult){
           index++;
         }else {
@@ -93,10 +91,9 @@ export class KST extends Indicator {
   static calculate = kst;
 
 
-  nextValue (price:number) {
+  _nextValue (price:number) {
     let nextResult = this.generator.next(price);
-    if(nextResult.value != undefined)
-      return nextResult.value;
+    return nextResult.value;
   };
 }
 

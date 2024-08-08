@@ -1,3 +1,4 @@
+import { CandleData } from '../index';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 /**
  * Created by AAravindan on 5/8/16.
@@ -8,8 +9,6 @@ export class PDMInput extends IndicatorInput {
 };
 
 export class PDM extends Indicator {
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor(input:PDMInput) {
     super(input);
     var lows = input.low
@@ -59,8 +58,8 @@ export class PDM extends Indicator {
         return result;
     };
 
-    nextValue(price:number):number | undefined {
-        return this.generator.next(price).value;
+    override nextValue(price:CandleData):number | undefined {
+        return this.generator.next(price.close).value;
     };
 
 }

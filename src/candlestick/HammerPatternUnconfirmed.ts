@@ -7,7 +7,7 @@ export default class HammerPatternUnconfirmed extends HammerPattern {
         this.name = 'HammerPatternUnconfirmed';
     }
 
-    logic (data:StockData) {
+    override logic (data:StockData) {
         let isPattern = this.downwardTrend(data, false);
         isPattern = isPattern && this.includesHammer(data, false);
         return isPattern;

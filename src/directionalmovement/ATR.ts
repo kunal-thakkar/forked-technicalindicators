@@ -15,8 +15,6 @@ export class ATRInput extends IndicatorInput {
 };
 
 export class ATR extends Indicator {
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor(input:ATRInput) {
     super(input);
     var lows = input.low;
@@ -75,7 +73,7 @@ export class ATR extends Indicator {
 
   static calculate = atr;
 
-  nextValue(price:CandleData):number | undefined {
+  override nextValue(price:CandleData):number | undefined {
       return this.generator.next(price).value;
   };
 }

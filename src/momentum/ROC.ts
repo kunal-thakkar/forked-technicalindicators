@@ -1,15 +1,14 @@
+import { CandleData } from '../index';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import LinkedList from '../Utils/FixedSizeLinkedList';
 
 
 export class ROCInput extends IndicatorInput {
   period : number;
-  values : number[];
+  values : CandleData[];
 } 
 
 export class ROC extends Indicator {
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor(input:ROCInput) {
       super(input);
       var period = input.period
@@ -18,14 +17,14 @@ export class ROC extends Indicator {
       this.generator = (function* (){
         let index = 1;
         var pastPeriods = new LinkedList(period);;
-        var tick = yield;
+        var tick: CandleData = yield;
         var roc;
         while (true) {
           pastPeriods.push(tick)
           if(index < period){
             index++;
           }else {
-            roc = ((tick - pastPeriods.lastShift) / (pastPeriods.lastShift)) * 100
+            roc = ((tick.close! - pastPeriods.lastShift) / (pastPeriods.lastShift)) * 100
           }
           tick = yield roc;
         }
@@ -43,11 +42,9 @@ export class ROC extends Indicator {
 
    static calculate = roc;
 
-    nextValue(price:number):number | undefined {
-        var nextResult = this.generator.next(price);
-        if(nextResult.value != undefined && (!isNaN(nextResult.value))) {
-          return this.format(nextResult.value);
-        }
+   override nextValue(price:CandleData):number | undefined {
+      var nextResult = this.generator.next(price);
+      return (nextResult.value != undefined && (!isNaN(nextResult.value))) ? this.format(nextResult.value) : undefined;
     };
 
 };

@@ -1,3 +1,4 @@
+import { CandleData } from '../index';
 import { IndicatorInput, Indicator } from '../indicator/indicator';
 
 "use strict"
@@ -41,41 +42,39 @@ export class PSARInput extends IndicatorInput{
 };
 
 export class PSAR extends Indicator {
-  result:number[];
-  generator:IterableIterator<number | undefined>;
   constructor (input:PSARInput) {
     super(input);
 
     let highs = input.high || [];
     let lows = input.low || [];
 
-    var genFn = function* (step:number, max:number):IterableIterator<number | undefined> {
+    var genFn = function* (step:number, max:number):Generator<number | undefined, number|undefined, CandleData> {
       let curr, extreme, sar, furthest;
 
       let up = true;
       let accel = step;
-      let prev = yield;
+      let prev: CandleData = yield;
       while(true) {
         if (curr) {
-          sar = sar + accel * (extreme - sar);
+          sar = sar! + accel * (extreme! - sar!);
 
           if (up) {
-            sar = Math.min(sar, furthest.low, prev.low);
+            sar = Math.min(sar, furthest?.low!, prev.low!);
 
-            if (curr.high > extreme) {
-              extreme = curr.high;
+            if (curr.high! > extreme!) {
+              extreme = curr.high!;
               accel = Math.min(accel + step, max);
             };
           } else {
-            sar = Math.max(sar, furthest.high, prev.high);
+            sar = Math.max(sar, furthest?.high!, prev.high!);
 
-            if (curr.low < extreme) {
+            if (curr.low! < extreme!) {
               extreme = curr.low;
               accel = Math.min(accel + step, max);
             }
           }
 
-          if ((up && curr.low < sar) || (!up && curr.high > sar)) {
+          if ((up && curr.low! < sar) || (!up && curr.high! > sar)) {
             accel = step;
             sar = extreme;
             up = !up;
@@ -110,10 +109,9 @@ export class PSAR extends Indicator {
 
   static calculate = psar;
 
-  nextValue (input:PSARInput):number {
+  _nextValue (input:PSARInput):number {
     let nextResult = this.generator.next(input);
-    if(nextResult.value !== undefined)
-      return nextResult.value;
+    return nextResult.value;
   };
 }
 

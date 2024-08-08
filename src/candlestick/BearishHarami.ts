@@ -6,7 +6,7 @@ export default class BearishHarami extends CandlestickFinder {
         this.requiredCount  = 2;
         this.name = 'BearishHarami';
     }
-    logic (data:StockData) {
+    override logic (data:StockData) {
         let firstdaysOpen   = data.open[0];
         let firstdaysClose  = data.close[0];
         let firstdaysHigh   = data.high[0];

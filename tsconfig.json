@@ -8,7 +8,9 @@
       "es2015.iterable",
       "es2015.collection",
       "es2015.promise",
-      "dom"
+      "dom",
+      "ES2018",
+      "ESNext"
     ],
     "suppressImplicitAnyIndexErrors": true,
     "module": "es6",

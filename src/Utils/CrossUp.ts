@@ -9,9 +9,6 @@ export class CrossInput extends IndicatorInput {
 export class CrossUp extends Indicator {
     lineA: number[];
     lineB: number[];
-    result: boolean[];
-    generator: IterableIterator<true | false>;
-
     constructor(input: CrossInput) {
         super(input);
 
@@ -21,8 +18,8 @@ export class CrossUp extends Indicator {
         var currentLineA = [];
         var currentLineB = [];
 
-        const genFn = (function* (): IterableIterator<true | false> {
-            var current = yield;
+        const genFn = (function* (): Generator<true | false, any, any> {
+            var current: {valueA: number, valueB: number} = yield;
             var result = false;
 
             while (true) {
@@ -69,14 +66,14 @@ export class CrossUp extends Indicator {
 
     static calculate = crossUp;
 
-    static reverseInputs(input: CrossInput): void {
+    static override reverseInputs(input: CrossInput): void {
         if (input.reversedInput) {
             input.lineA ? input.lineA.reverse() : undefined;
             input.lineB ? input.lineB.reverse() : undefined;
         }
     }
 
-    nextValue(valueA: number, valueB: number): true | false {
+    _nextValue(valueA: number, valueB: number): true | false {
         return this.generator.next({
             valueA: valueA,
             valueB: valueB

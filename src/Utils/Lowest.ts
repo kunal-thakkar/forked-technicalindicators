@@ -9,7 +9,6 @@ export class LowestInput extends IndicatorInput {
 }
 
 export class Lowest extends Indicator {
-  generator:IterableIterator<number | undefined>;
     constructor (input:LowestInput) {
       super(input);
       var values     = input.values;
@@ -46,11 +45,9 @@ export class Lowest extends Indicator {
 
   static calculate = lowest;
 
-  nextValue(price:number):number | undefined {
-     var result =  this.generator.next(price);
-     if(result.value != undefined){
-        return result.value;
-      }
+  override nextValue(price:CandleData):number | undefined {
+     var result =  this.generator.next(price.close);
+     return result.value;
   };
 }
 

@@ -1,11 +1,12 @@
 "use strict"
+import { CandleData } from '../index';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import { SMA }  from '../moving_averages/SMA';
 import { SD } from '../Utils/SD';
 export class BollingerBandsInput extends IndicatorInput {
     period : number;
     stdDev : number;
-    values : number[];
+    values : CandleData[];
 };
 
 export class BollingerBandsOutput extends IndicatorInput {
@@ -16,7 +17,6 @@ export class BollingerBandsOutput extends IndicatorInput {
 };
 
 export class BollingerBands extends Indicator {
-    generator:IterableIterator<BollingerBandsOutput | undefined>;
     constructor(input:BollingerBandsInput) {
         super(input);
         var period = input.period
@@ -31,7 +31,7 @@ export class BollingerBands extends Indicator {
         sma = new SMA({period : period, values :[], format : (v) => {return v}});
         sd  = new SD({period : period, values : [], format : (v) => {return v}});
 
-        this.generator = (function* (){
+        this.generator = (function* (): Generator<number | undefined, any, CandleData> {
             var result;
             var tick;
             var calcSMA;
@@ -42,8 +42,8 @@ export class BollingerBands extends Indicator {
                 calcsd  = sd.nextValue(tick);
                 if(calcSMA){
                     let middle = format(calcSMA);
-                    let upper = format(calcSMA + (calcsd * stdDev));
-                    let lower = format(calcSMA - (calcsd * stdDev));
+                    let upper = format(calcSMA! + (calcsd! * stdDev!));
+                    let lower = format(calcSMA! - (calcsd! * stdDev!));
                     let pb:number = format((tick - lower) / (upper - lower));
                     result = {
                         middle : middle,
@@ -68,7 +68,7 @@ export class BollingerBands extends Indicator {
 
     static calculate = bollingerbands;
 
-    nextValue(price:number):BollingerBandsOutput | undefined {
+    _nextValue(price:CandleData):BollingerBandsOutput | undefined {
         return this.generator.next(price).value;
     };
 }

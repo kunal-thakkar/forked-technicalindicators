@@ -7,7 +7,7 @@ export default class ThreeWhiteSoldiers extends CandlestickFinder {
         this.name = 'ThreeWhiteSoldiers';
         this.requiredCount  = 3;
     }
-    logic (data:StockData) {
+    override logic (data:StockData) {
         let firstdaysOpen   = data.open[0];
         let firstdaysClose  = data.close[0];
         let firstdaysHigh   = data.high[0];

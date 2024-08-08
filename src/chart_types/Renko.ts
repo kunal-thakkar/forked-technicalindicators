@@ -19,8 +19,6 @@ export class RenkoInput extends IndicatorInput {
 }
 
 class Renko extends Indicator{
-    result : CandleList;
-    generator:IterableIterator<CandleData | undefined>;
     constructor(input:RenkoInput) {
       super(input);
       var format = this.format;
@@ -107,7 +105,7 @@ class Renko extends Indicator{
 
     static calculate=renko;
 
-    nextValue(price:number):CandleList | undefined {
+    _nextValue(price:number):CandleList | undefined {
         console.error('Cannot calculate next value on Renko, Every value has to be recomputed for every change, use calcualte method');
         return null;
     };

@@ -10,7 +10,6 @@ export class OBVInput extends IndicatorInput {
 }
 
 export class OBV extends Indicator {
-  generator:IterableIterator<number | undefined>;
   constructor(input:OBVInput) {
     super(input);
     var closes      = input.close;
@@ -20,22 +19,22 @@ export class OBV extends Indicator {
 
     this.generator = (function* (){
       var result = 0;
-      var tick;
-      var lastClose;
+      var tick: CandleData;
+      var lastClose = 0;
       tick = yield;
       if(tick.close && (typeof tick.close === 'number')){
-        lastClose = tick.close;
+        lastClose = tick.close!;
         tick = yield;
       }
       while (true)
       {
-        if(lastClose < tick.close ){
-          result = result + tick.volume;
+        if(lastClose < tick.close! ){
+          result = result + tick.volume!;
         }
-        else if(tick.close < lastClose){
-          result = result - tick.volume;
+        else if(tick.close! < lastClose){
+          result = result - tick.volume!;
         }
-        lastClose = tick.close;
+        lastClose = tick.close!;
         tick = yield result;
       }
     })();
@@ -56,7 +55,7 @@ export class OBV extends Indicator {
 
   static calculate = obv;
 
-  nextValue(price:CandleData):number | undefined {
+  override nextValue(price:CandleData):number | undefined {
      return this.generator.next(price).value;
   };
 

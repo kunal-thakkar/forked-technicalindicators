@@ -1,12 +1,11 @@
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import { MAInput, SMA } from './SMA';
 import { LinkedList } from '../Utils/LinkedList';
+import { CandleData } from '../index';
 
 export class EMA extends Indicator{
     period:number;
     price:number[];
-    result : number[];
-    generator:IterableIterator<number | undefined>;
     constructor(input:MAInput) {
         super(input);
         var period = input.period
@@ -18,12 +17,12 @@ export class EMA extends Indicator{
 
         sma = new SMA({period : period, values :[]});
 
-        var genFn = (function* ():IterableIterator<number | undefined>{
-            var tick  = yield;
+        var genFn = (function* ():Generator<number | undefined, number|undefined, CandleData>{
+            var tick: CandleData = yield;
             var prevEma;
             while (true) {
                 if(prevEma !== undefined && tick !== undefined){
-                    prevEma = ((tick - prevEma) * exponent) + prevEma;
+                    prevEma = ((tick.close! - prevEma) * exponent) + prevEma;
                     tick = yield prevEma;
                 }else {
                     tick = yield;
@@ -49,10 +48,9 @@ export class EMA extends Indicator{
 
     static calculate = ema;
 
-    nextValue(price:number) {
+    override nextValue(price:CandleData): number | undefined {
         var result = this.generator.next(price).value;
-        if(result != undefined)
-            return this.format(result);
+        return (result != undefined) ? this.format(result) : undefined;
     };
 }
 

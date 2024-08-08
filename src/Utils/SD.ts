@@ -1,3 +1,4 @@
+import { CandleData } from '../index';
 import { IndicatorInput, Indicator } from '../indicator/indicator';
 import { SMA } from '../moving_averages/SMA';
 import LinkedList from '../Utils/FixedSizeLinkedList';
@@ -13,7 +14,6 @@ export class SDInput extends IndicatorInput{
 };
 
 export class SD extends Indicator {
-  generator:IterableIterator<number | undefined>;
   constructor (input:SDInput) {
     super(input);
     var period = input.period
@@ -55,10 +55,9 @@ export class SD extends Indicator {
 
   static calculate = sd;
 
-    nextValue(price:number):number | undefined {
-        var nextResult = this.generator.next(price);
-        if(nextResult.value != undefined)
-          return this.format(nextResult.value);
+  override nextValue(price:CandleData):number | undefined {
+        var nextResult = this.generator.next(price.close);
+        return (nextResult.value != undefined) ? this.format(nextResult.value) : undefined;
     };
 } 
 

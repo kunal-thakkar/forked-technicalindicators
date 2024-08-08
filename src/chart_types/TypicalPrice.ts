@@ -13,12 +13,11 @@ export class TypicalPriceInput extends IndicatorInput {
 }
 
 export class TypicalPrice extends Indicator{
-    result : number[] = [];
-    generator:IterableIterator<number | undefined>;
+    override result : number[] = [];
     constructor(input:TypicalPriceInput) {
       super(input);
       this.generator = (function* (){
-          let priceInput = yield;
+          let priceInput: CandleData = yield;
           while (true) {
             priceInput = yield (priceInput.high + priceInput.low + priceInput.close) / 3;
           }
@@ -37,7 +36,7 @@ export class TypicalPrice extends Indicator{
 
     static calculate=typicalprice;
 
-    nextValue(price:CandleData):number | undefined {
+    override nextValue(price:CandleData):number | undefined {
         var result = this.generator.next(price).value;
         return result;
     };

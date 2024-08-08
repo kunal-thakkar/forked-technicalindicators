@@ -10,8 +10,6 @@ export class ForceIndexInput extends IndicatorInput {
 
 
 export class ForceIndex extends Indicator {
-  result : number[]
-  generator:IterableIterator<number | undefined>;;
   constructor(input:ForceIndexInput) {
     super(input);
     var closes = input.close;
@@ -29,9 +27,9 @@ export class ForceIndex extends Indicator {
       var tick = yield;
       let forceIndex;
       while (true) {
-        forceIndex = (tick.close - previousTick.close) * tick.volume;
+        forceIndex = (tick.close! - previousTick.close!) * tick.volume!;
         previousTick = tick;
-        tick = yield emaForceIndex.nextValue(forceIndex);
+        tick = yield emaForceIndex.nextValue({close:forceIndex});
       }
     })();
 
@@ -50,11 +48,12 @@ export class ForceIndex extends Indicator {
 
   static calculate = forceindex;
 
-  nextValue(price: CandleData):number | undefined {
-      let result = this.generator.next(price).value;
-      if(result != undefined) {
-        return result;
-      }
+  override nextValue(price: CandleData):number | undefined {
+    let result = this.generator.next(price).value;
+    if(result != undefined) {
+      return result;
+    }
+    return undefined;
   };
 }
 

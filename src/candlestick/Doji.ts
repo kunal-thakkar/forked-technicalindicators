@@ -7,7 +7,7 @@ export default class Doji extends CandlestickFinder {
         this.name = 'Doji';
         this.requiredCount  = 1;
     }
-    logic (data:StockData):boolean {
+    override logic (data:StockData):boolean {
         let daysOpen = data.open[0];
         let daysClose = data.close[0];
         let daysHigh = data.high[0];

@@ -11,7 +11,6 @@ export class AwesomeOscillatorInput extends IndicatorInput {
 }
 
 export class AwesomeOscillator extends Indicator {
-  generator:IterableIterator<number | undefined>;
     constructor (input:AwesomeOscillatorInput) {
       super(input);
       var highs       = input.high;
@@ -35,8 +34,8 @@ export class AwesomeOscillator extends Indicator {
         {
 
           medianPrice = (tick.high + tick.low) / 2
-          slowSmaValue = slowSMA.nextValue(medianPrice);
-          fastSmaValue = fastSMA.nextValue(medianPrice);
+          slowSmaValue = slowSMA.nextValue({close:medianPrice});
+          fastSmaValue = fastSMA.nextValue({close:medianPrice});
           if(slowSmaValue !== undefined && fastSmaValue !== undefined) {
             result = fastSmaValue - slowSmaValue;
           }
@@ -60,11 +59,9 @@ export class AwesomeOscillator extends Indicator {
 
   static calculate = awesomeoscillator;
 
-  nextValue(price:CandleData):number | undefined {
-     var result =  this.generator.next(price);
-     if(result.value != undefined){
-        return this.format(result.value);
-      }
+  override nextValue(price:CandleData):number | undefined {
+    var result =  this.generator.next(price);
+    return (result.value != undefined) ? this.format(result.value) : undefined;
   };
 }
 

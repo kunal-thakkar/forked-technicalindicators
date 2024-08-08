@@ -7,7 +7,7 @@ export default class BullishEngulfingPattern extends CandlestickFinder {
         this.name = 'BullishEngulfingPattern';
         this.requiredCount  = 2;
     }
-    logic (data:StockData) {
+    override logic (data:StockData) {
         let firstdaysOpen   = data.open[0];
         let firstdaysClose  = data.close[0];
         let firstdaysHigh   = data.high[0];

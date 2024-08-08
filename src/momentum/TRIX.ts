@@ -6,15 +6,14 @@
 import { ROC } from './ROC.js';
 import { EMA } from '../moving_averages/EMA.js';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
+import { CandleData } from '../index';
 
 export class TRIXInput extends IndicatorInput{
-  values:number[];
+  values:CandleData[];
   period:number;
 };
 
 export class TRIX extends Indicator {
-  result : number[];
-  generator:IterableIterator<number | undefined>;
   constructor(input:TRIXInput) {
     super(input);
     let priceArray  = input.values;
@@ -28,13 +27,13 @@ export class TRIX extends Indicator {
 
     this.result = [];
 
-    this.generator = (function* ():IterableIterator< number | undefined>{
+    this.generator = (function* ():Generator< number | undefined, number|undefined, CandleData>{
       let tick = yield;
       while (true) {
         let initialema           = ema.nextValue(tick);
-        let smoothedResult       = initialema ? emaOfema.nextValue(initialema) : undefined;
-        let doubleSmoothedResult = smoothedResult ? emaOfemaOfema.nextValue(smoothedResult) : undefined;
-        let result               = doubleSmoothedResult ? trixROC.nextValue(doubleSmoothedResult) : undefined;
+        let smoothedResult       = initialema ? emaOfema.nextValue({close:initialema}) : undefined;
+        let doubleSmoothedResult = smoothedResult ? emaOfemaOfema.nextValue({close:smoothedResult}) : undefined;
+        let result               = doubleSmoothedResult ? trixROC.nextValue({close:doubleSmoothedResult}) : undefined;
         tick = yield result ? format(result) : undefined;
       }
     })();
@@ -51,10 +50,9 @@ export class TRIX extends Indicator {
     
     static calculate=trix;
 
-    nextValue(price:number) {
+    override nextValue(price:CandleData): number|undefined {
       let nextResult = this.generator.next(price);
-      if(nextResult.value !== undefined)
-        return nextResult.value;
+      return nextResult.value;
     };
 } 
 

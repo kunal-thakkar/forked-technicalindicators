@@ -1,7 +1,7 @@
 
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import FixedSizedLinkedList from './FixedSizeLinkedList';
-import { CandleData } from '../StockData';
+import { CandleData } from '../index';
 
 export class SumInput extends IndicatorInput {
   values :number[]
@@ -9,7 +9,6 @@ export class SumInput extends IndicatorInput {
 }
 
 export class Sum extends Indicator {
-  generator:IterableIterator<number | undefined>;
     constructor (input:SumInput) {
       super(input);
       var values     = input.values;
@@ -38,19 +37,15 @@ export class Sum extends Indicator {
 
       values.forEach((value, index) => {
         var result = this.generator.next(value);
-        if(result.value != undefined) {
-          this.result.push(result.value);
-        }
+        return (result.value != undefined) ?  this.result.push(result.value): undefined;
       });
   };
 
   static calculate = sum;
 
-  nextValue(price:number):number | undefined {
-     var result =  this.generator.next(price);
-     if(result.value != undefined){
-        return result.value;
-      }
+  override nextValue(price:CandleData):number | undefined {
+    var result =  this.generator.next(price.close);
+    return result.value;
   };
 }
 

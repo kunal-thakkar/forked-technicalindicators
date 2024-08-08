@@ -1,35 +1,34 @@
 import { MAInput } from './SMA';
 import { Indicator, IndicatorInput } from '../indicator/indicator';
 import { LinkedList } from '../Utils/LinkedList';
+import { CandleData } from '../index';
 
 //STEP3. Add class based syntax with export
 export class WilderSmoothing extends Indicator{
     period:number;
-    price:number[];
-    result : number[];
-    generator:IterableIterator<number | undefined>;
+    price:CandleData[];
     constructor(input:MAInput) {
         super(input);
         this.period  = input.period;
         this.price = input.values;
-        var genFn = (function*(period:number):IterableIterator<number | undefined> {
+        var genFn = (function*(period:number):Generator<number | undefined, number|boolean|undefined, CandleData> {
             var list = new LinkedList();
             var sum = 0;
             var counter = 1;
-            var current = yield;
-            var result = 0;
+            var current: CandleData = yield;
+            var result: number | undefined = 0;
             while(true){
                 if(counter < period){
                     counter ++;
-                    sum = sum + current;
+                    sum = sum + current.close!;
                     result = undefined;
                 } else if(counter == period){
                     counter ++;
-                    sum = sum + current;
+                    sum = sum + current.close!;
                     result = sum;
                 }
                 else{
-                    result = result - (result / period) + current;
+                    result = result! - (result! / period) + current.close!;
                 }
                 current = yield result;
             }
@@ -47,10 +46,9 @@ export class WilderSmoothing extends Indicator{
     
     static calculate = wildersmoothing;
 
-    nextValue(price:number):number | undefined {
+    override nextValue(price:CandleData):number | undefined {
         var result = this.generator.next(price).value;
-        if(result != undefined)
-            return this.format(result);
+        return (result != undefined) ? this.format(result) : undefined;
     };
 }
 
